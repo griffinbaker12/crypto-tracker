@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from enums import Coin
 from get_price import get_crytpo_price
@@ -14,8 +13,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],  # Allow these HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
