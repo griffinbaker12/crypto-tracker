@@ -6,6 +6,7 @@ from get_price import get_crytpo_price
 app = FastAPI()
 
 # CORS middleware to allow cross-origin requests
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow requests from any origin, adjust as needed
