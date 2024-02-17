@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Crypto Price Tracker</title>
+        <script src="https://unpkg.com/htmx.org@1.6.0"></script>
+        <script>
+            const bitcoinOwned = "0.380809";
+            const ethereumOwned = "18.8845";
+            const coinMap = {
+                "bitcoin": bitcoinOwned,
+                "ethereum": ethereumOwned
+            };
+            function calculateTotalValue() {
+                const bitcoinPriceElement = document.getElementById('price-bitcoin');
+                const ethereumPriceElement = document.getElementById('price-ethereum');
+
+                const bitcoinPrice = parseFloat(bitcoinPriceElement.innerText.replace("$", "").replace(",", ""));
+                const ethereumPrice = parseFloat(ethereumPriceElement.innerText.replace("$", "").replace(",", ""));
+
+                const isTherenNan = isNaN(bitcoinPrice) || isNaN(ethereumPrice);
+
+                const bitcoinOwned = parseFloat(document.getElementById('bitcoin-input').value);
+                const ethereumOwned = parseFloat(document.getElementById('ethereum-input').value);
+
+                const totalBitcoinValue = bitcoinOwned * bitcoinPrice;
+                const totalEthereumValue = ethereumOwned * ethereumPrice;
+
+                const totalValue = totalBitcoinValue + totalEthereumValue;
+
+                const totalValueElement = document.getElementById('total-value');
+                if (isTherenNan) {
+                    totalValueElement.innerText = "Calculating...";
+                } else {
+                    totalValueElement.innerText = totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                }
+            }
+        </script>
+    </head>
+    <body>
+
+        <h1>Crypto Price Tracker</h1>
+        <div
+            hx-get="http://3.82.26.106:80/coin/bitcoin" 
+            hx-trigger="load"
+            hx-target="#price-bitcoin"
+            style="
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border: 2px solid brown;
+            padding: 4px 8px;
+            ">
+            <image style="margin-right: 12px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" alt="Crypto Image" width="40" height="40"/>
+            <h2>Bitcoin</h2>
+        </div>
+        <div id="bitcoin-price-container" style="
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            height: 50px;
+            background-color: #f0f0f0;
+            padding: 0px 8px;
+            ">
+            <h2 style="margin-right: 12px">The current price is: </h2>
+            <div id="price-bitcoin"><h2>Loading...</h2></div>
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            background-color: #f0f0f0;
+            align-items: center;
+            padding: 0px 8px;
+            ">
+            <h2 style="margin-right: 12px">You own:</h2>
+            <!-- Input bar for Bitcoin -->
+            <input type="number" style="height: 25px" type="number" id="bitcoin-input" value="0" step="0.01" oninput="updateOwned('bitcoin', this.value)">
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            background-color: #f0f0f0;
+            align-items: center;
+            border-top: 2px solid black;
+            padding: 4px 8px;
+            ">
+            <h2 style="margin-right: 12px">Total Value:</h2>
+            <h2 id="bitcoin-total-value">Loading...</h2>
+        </div>
+
+        <div
+            hx-get="http://3.82.26.106:80/coin/ethereum"
+            hx-trigger="load"
+            hx-target="#price-ethereum"
+            style="
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border: 2px solid black;
+            padding: 4px 8px;
+            margin-top: 16px;
+            ">
+            <image style="margin-right: 12px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Ethereum-icon-purple.svg/768px-Ethereum-icon-purple.svg.png" alt="Crypto Image" width="40" height="40"/>
+            <h2>Ethereum</h2>
+        </div>
+        <div id="ethereum-price-container" style="
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            height: 50px;
+            background-color: #f0f0f0;
+            padding: 0px 8px;
+            ">
+            <h2 style="margin-right: 12px">The current price is: </h2>
+            <div id="price-ethereum"><h2>Loading...</h1></div>
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            background-color: #f0f0f0;
+            align-items: center;
+            padding: 0px 8px;
+            ">
+            <h2 style="margin-right: 12px">You own:</h2>
+            <!-- Input bar for Bitcoin -->
+            <input style="height: 25px" type="number" id="ethereum-input" value="0" step="0.01"  oninput="updateOwned('ethereum', this.value)">
+        </div>
+        <div style="
+            display: flex;
+            flex-direction: row;
+            background-color: #f0f0f0;
+            align-items: center;
+            padding: 0px 8px;
+            border-top: 2px solid black;
+            ">
+            <h2 style="margin-right: 12px">Total Value:</h2>
+            <h2 id="ethereum-total-value">Loading...</h2>
+        </div>
+        
+        <div style="
+            display: flex;
+            flex-direction: row;
+            background-color: #f0f0f0;
+            align-items: center;
+            border: 3px solid green;
+            margin-top: 16px;
+            padding: 4px 8px;
+            ">
+            <h1 style="margin-right: 12px">Total:</h2>
+            <h1 id="total-value">Calculating...</h2>
+        </div>
+
+        <script>
+            // Function to handle HTMX request completion
+            function handleHTMXResponse(evt) {
+                // Check if the request succeeded
+                if (evt.detail.xhr.status === 200) {
+                    // Parse the JSON response
+                    const responseData = JSON.parse(evt.detail.xhr.responseText);
+
+                    // Access the price data and update the HTML content
+                    const idStr = `price-${responseData.coin.toLowerCase()}`
+                    const priceElement = document.getElementById(idStr);
+                    const strippedPrice = responseData.price.replace("$", "").replace(",", "");
+                    priceElement.innerHTML = `<h2>${responseData.price}</h2>`;
+
+                    const coinName = responseData.coin.toLowerCase();
+
+                    const ownedValue = document.getElementById(`${responseData.coin.toLowerCase()}-input`);
+                    const coinValue = coinMap[coinName];
+                    
+                    ownedValue.value = coinValue;
+                    
+                    const totalValueElement = document.getElementById(`${responseData.coin.toLowerCase()}-total-value`);
+                    const totalValue = coinMap[responseData.coin.toLowerCase()] * strippedPrice;
+
+                    const formattedTotalValue = totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                    totalValueElement.innerText = formattedTotalValue;
+
+                    calculateTotalValue(); 
+                } else {
+                    console.error('HTMX request failed:', evt.detail.xhr.statusText);
+                }
+            }
+
+            function updateOwned(coin, value) {
+                const priceElement = document.getElementById(`price-${coin}`);
+                const strippedPrice = priceElement.innerText.replace("$", "").replace(",", "");
+                const totalValueElement = document.getElementById(`${coin}-total-value`);
+
+                // Calculate the total value
+                const totalValue = value * strippedPrice;
+
+                // Format the total value as dollars using toLocaleString()
+                const formattedTotalValue = totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+                // Update the total value element with the formatted total value
+                totalValueElement.innerText = formattedTotalValue;
+
+                // Update the coinMap with the new Value
+                coinMap[coin] = value;
+
+                // Calculate the total value of all coins
+                calculateTotalValue();
+            }
+
+            // Add event listener for htmx:afterSwap event
+            document.addEventListener('htmx:afterSwap', handleHTMXResponse);
+        </script>
+
+    </body>
+</html>
