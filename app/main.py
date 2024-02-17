@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from enums import Coin
 from get_price import get_crytpo_price
@@ -14,6 +15,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 @app.get("/")
 def read_root():
@@ -28,4 +31,5 @@ def read_hello():
 @app.get("/coin/{coin}")
 def read_coin(coin: Coin):
     price = get_crytpo_price(coin)
+    print(coin, price)
     return {"coin": coin, "price": price}
