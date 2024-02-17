@@ -182,6 +182,7 @@
                 } else {
                     console.error('HTMX request failed:', evt.detail.xhr.statusText);
                 }
+
             }
 
             function updateOwned(coin, value) {
@@ -203,6 +204,7 @@
 
                 // Calculate the total value of all coins
                 calculateTotalValue();
+                
             }
 
             // Add event listener for htmx:afterSwap event
